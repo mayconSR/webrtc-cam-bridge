@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+package-lock.json
+
+# Build
+dist/
+build/
+.cache/
+.tmp/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Editor/OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Vite / Next
+.next/
+.out/
+.vercel/
