@@ -1,5 +1,5 @@
 {
-  "name": "cam2pc-webrtc",
+  "name": "webrtc-cam-bridge",
   "private": true,
   "workspaces": ["server", "web"],
   "scripts": {

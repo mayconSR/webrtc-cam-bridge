@@ -1,5 +1,5 @@
 {
-  "name": "@cam2pc-webrtc/server",
+  "name": "@webrtc-cam-bridge/server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
