@@ -14,7 +14,10 @@ export default function Viewer({ room }) {
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_SIGNAL_URL, { transports: ["websocket"] });
     socketRef.current = socket;
-    socket.emit("join", room);
+    socket.on("connect", () => setStatus("socket-connected"));
+    socket.on("connect_error", (e) => { console.error(e); setStatus("socket-error"); });
+
+    socket.emit("join", { room, role: "viewer" });
 
     const pc = new RTCPeerConnection({ iceServers });
     pcRef.current = pc;
@@ -51,10 +54,17 @@ export default function Viewer({ room }) {
     };
   }, [room]);
 
+  const goFullscreen = async () => {
+    try { await remoteVideoRef.current?.requestFullscreen?.(); } catch {}
+  };
+
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 16, fontFamily: "system-ui, sans-serif" }}>
       <h2>Viewer — room <code>{room}</code></h2>
       <p>Status: {status}</p>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <button onClick={goFullscreen}>Tela cheia</button>
+      </div>
       <video
         ref={remoteVideoRef}
         autoPlay
@@ -62,6 +72,11 @@ export default function Viewer({ room }) {
         controls
         style={{ width: "100%", borderRadius: 12, background: "#000" }}
       />
+      {status === 'socket-error' && (
+        <p style={{ color: '#b91c1c' }}>
+          Erro de conexão ao servidor de sinalização. Verifique <code>NEXT_PUBLIC_SIGNAL_URL</code> (HTTPS/WSS) e CORS.
+        </p>
+      )}
     </div>
   );
 }
