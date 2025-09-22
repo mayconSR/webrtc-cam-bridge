@@ -103,7 +103,6 @@ export default function Phone({ room }) {
     };
   }, [room]);
 
-  // ao trocar facing, reinicia track
   useEffect(() => {
     if (!pcRef.current) return;
     (async () => {
