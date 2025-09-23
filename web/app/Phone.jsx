@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
@@ -16,11 +16,15 @@ export default function Phone({ room }) {
   const [torchOn, setTorchOn] = useState(false);
 
   // cria/atualiza a midia e envia p/ peer
-  async function startOrReplaceTrack(kind = 'video') {
+  async function startOrReplaceTrack(kind = "video") {
     const oldStream = stream;
     const s = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: facing, width: { ideal: 1280 }, frameRate: { ideal: 30 } },
-      audio: false
+      video: {
+        facingMode: facing,
+        width: { ideal: 1280 },
+        frameRate: { ideal: 30 },
+      },
+      audio: false,
     });
     setStream(s);
     if (localVideoRef.current) localVideoRef.current.srcObject = s;
@@ -62,7 +66,9 @@ export default function Phone({ room }) {
   }
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SIGNAL_URL, { transports: ["websocket"] });
+    const socket = io(process.env.NEXT_PUBLIC_SIGNAL_URL, {
+      transports: ["websocket"],
+    });
     socketRef.current = socket;
     socket.emit("join", { room, role: "phone" });
 
@@ -70,11 +76,26 @@ export default function Phone({ room }) {
     pcRef.current = pc;
 
     pc.onicecandidate = (e) => {
-      if (e.candidate) socket.emit("ice-candidate", { room, candidate: e.candidate });
+      if (e.candidate)
+        socket.emit("ice-candidate", { room, candidate: e.candidate });
     };
 
-    socket.on("ice-candidate", async (c) => { try { await pc.addIceCandidate(c); } catch {} });
-    socket.on("answer", async (sdp) => { await pc.setRemoteDescription(sdp); setStatus("connected"); });
+    socket.on("ice-candidate", async (c) => {
+      try {
+        await pc.addIceCandidate(c);
+      } catch {}
+    });
+    socket.on("answer", async (sdp) => {
+      try {
+        console.log("[socket] answer recebida");
+        await pc.setRemoteDescription(sdp);
+        console.log("[pc] remoteDescription aplicada (answer)");
+        setStatus("connected");
+      } catch (e) {
+        console.error("[pc] erro ao aplicar answer", e);
+        setStatus("error");
+      }
+    });
 
     // se alguém entrou, re-oferece
     socket.on("peer-joined", async ({ role }) => {
@@ -88,7 +109,7 @@ export default function Phone({ room }) {
 
     (async () => {
       try {
-        await startOrReplaceTrack('video');
+        await startOrReplaceTrack("video");
         setStatus("offered");
       } catch (err) {
         console.error(err);
@@ -107,28 +128,38 @@ export default function Phone({ room }) {
     if (!pcRef.current) return;
     (async () => {
       try {
-        await startOrReplaceTrack('video');
-      } catch (e) { console.error(e); }
+        await startOrReplaceTrack("video");
+      } catch (e) {
+        console.error(e);
+      }
     })();
   }, [facing]);
 
   return (
     <div style={{ padding: 16, fontFamily: "system-ui, sans-serif" }}>
-      <h2>Phone — room <code>{room}</code></h2>
+      <h2>
+        Phone — room <code>{room}</code>
+      </h2>
       <p>Status: {status}</p>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <button onClick={() => setFacing(facing === 'user' ? 'environment' : 'user')}>
-          Trocar câmera ({facing === 'user' ? 'frontal' : 'traseira'})
+      <div
+        style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}
+      >
+        <button
+          onClick={() => setFacing(facing === "user" ? "environment" : "user")}
+        >
+          Trocar câmera ({facing === "user" ? "frontal" : "traseira"})
         </button>
         <button
           onClick={() => setTorch(!torchOn)}
           disabled={!torchSupported}
-          title={torchSupported ? '' : 'Torch não suportado neste dispositivo'}
+          title={torchSupported ? "" : "Torch não suportado neste dispositivo"}
         >
-          {torchOn ? 'Desligar' : 'Ligar'} torch
+          {torchOn ? "Desligar" : "Ligar"} torch
         </button>
-        <button onClick={() => startOrReplaceTrack('video')}>Reiniciar vídeo</button>
+        <button onClick={() => startOrReplaceTrack("video")}>
+          Reiniciar vídeo
+        </button>
       </div>
 
       <video
